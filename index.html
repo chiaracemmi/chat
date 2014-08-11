@@ -22,6 +22,48 @@
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       var socket = io();
+      
+
+
+
+
+
+      var typing = false;  
+var timeout = undefined;
+
+function timeoutFunction() {  
+  typing = false;
+  socket.emit("typing", false);
+          $('#messages').find(".typing").remove();
+
+}
+
+$("#m").keypress(function(e){
+  if (e.which !== 13) {
+    if (typing === false && $("#m").is(":focus")) {
+      typing = true;
+      socket.emit("typing", true);
+    }else {
+      clearTimeout(timeout);
+      timeout = setTimeout(timeoutFunction, 2000);
+    }
+  }
+});
+socket.on("isTyping", function(data) {  
+  if (data.isTyping) {
+    
+      $('#messages').append($('<li class="typing">').text("sta scrivendo"));
+      timeout = setTimeout(timeoutFunction, 2000);
+    
+}
+});
+
+
+
+
+
+
+
       $('form').submit(function(){
         socket.emit('chat message', $('#m').val());
         $('#m').val('');
@@ -29,6 +71,9 @@
       });
       socket.on('chat message', function(msg){
         $('#messages').append($('<li>').text(msg));
+      });
+       socket.on('user connection', function(broad){
+        $('#messages').append($('<li>').text(broad));
       });
     </script>
   </body>
